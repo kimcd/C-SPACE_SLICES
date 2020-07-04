@@ -180,7 +180,7 @@ classdef linkManipulator < matlab.mixin.SetGet % Handle
             %obj.Frame2 = frame;
         end
         
-        function plot_taskspace(obj, task_points)
+        function plot_task_space(obj, task_points, cspace_points)
             % points is 2xN where N is number of points
             % plot in task space
             if nargin == 2
@@ -190,21 +190,27 @@ classdef linkManipulator < matlab.mixin.SetGet % Handle
             else
                 % too many inputs
             end
-        end
-                
-        function plot_cspace(obj, cspace_points, c)
-            % plot in configuration space
-            if nargin == 3
-                for i = 1:size(cspace_points,2)
-                    plot(obj.cSpaceAxs,cspace_points(1,i),cspace_points(2,i), c)
+         function plot_c
+            % plot in task and configuration space
+            elseif nargin == 3
+                for i = 1:size(task_points,2)
+                    plot(obj.simAxs,task_points(1,i),task_points(2,i),'kx')
                 end
+                
+                for i = 1:size(cspace_points,2)
+                    plot(obj.cSpaceAxs,cspace_points(1,i),cspace_points(2,i),'kx')
+                end
+                
             else
-                %too many inputs                
-            end            
+                %too many inputs
+                
+            end
+            
         end
         
     end %end methods
-        
+    
+    
 end %end classdef
 
 
