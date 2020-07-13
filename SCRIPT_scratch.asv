@@ -1,13 +1,8 @@
 %%
 %SUMMARY
 % Tx * Rx * Tz
-% reading from pre-multiply (right to left), transformations are done
-% w.r.t. the global axis. 
-% OR
-% reading from post-multiply (left to right), transofmration are done
-% w.r.t. the local axis. 
-
-%%
+% reading from pre-multiply (right to left): 
+% 
 clear all; close all;
 fig = figure; 
 axs = axes('Parent',fig); 
