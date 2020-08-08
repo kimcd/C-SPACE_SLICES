@@ -26,9 +26,9 @@ if ~exist('simObj')
     
     % Hide frames
     frames = '0123456E';
-    for i = 1:numel(frames)
-        hideTriad(simObj.(sprintf('hFrame%s',frames(i))));
-    end
+    %for i = 1:numel(frames)
+    %    hideTriad(simObj.(sprintf('hFrame%s',frames(i))));
+    %end
 end
 %% Set nozzle in environment
 H_nozzle_W = Tz(500) * Ty(-300); %* Rx(pi/2); % arbitrary. looks good enough
@@ -53,27 +53,30 @@ for i = 1:n
     points_T(1,i) = r*sin(s(i)); % x-position
     points_T(2,i) = r*cos(s(i)); % y-position
     points_T(3,i) = 50; %z-position
-    points_T(4,i) = 1; 
+    points_T(4,i) = 1;
 end
+
+points_T=points_T(:,1:end-1); % final point is redundant
+n = size(points_T,2);
 
 %t = hgtransform('Parent',simObj.Axes);
 %set(X, 'Parent', t);
-%points_T = Ry(pi/2)*points_T; % lift it up 
+%points_T = Ry(pi/2)*points_T; % lift it up
 points_W =  simObj.ToolPose * points_T; %place circle at end of tool
 plt_Waypoints = plot3(simObj.Axes,points_W(1,:),points_W(2,:),points_W(3,:),'.m');
 
 %% Move tool to nozzle (single point)
 for i = 1:n
-    i
+    
     delete(plt_Waypoints)
     
-    H_point2W = point_frame(simObj.ToolPose, points_T(1:3,i), points_T(1:3,i+1));
+    H_point2W = point_frame(simObj.ToolPose, points_T(1:3,i), points_T(1:3,mod(i,n)+1));
     
-    H_point2T = invSE(simObj.ToolPose) * H_point2W; 
+    H_point2T = invSE(simObj.ToolPose) * H_point2W;
     
-    H_tool2W_desired = Tz(-100)*(H_nozzle_W * invSE(H_point2T)); % lower the nozzle tip by 100mm so axes don't overlap
+    H_tool2W_desired = Tz(-50)*(H_nozzle_W * invSE(H_point2T)); % lower the nozzle tip by 100mm so axes don't overlap
     simObj.ToolPose = H_tool2W_desired;
-    H_point2W_new = simObj.ToolPose * H_point2T; 
+    H_point2W_new = simObj.ToolPose * H_point2T;
     
     AxisLabels{1} = sprintf('x_{%d}',i);
     AxisLabels{2} = sprintf('y_{%d}',i);
@@ -84,41 +87,16 @@ for i = 1:n
     point_csys = triad(...
         'Parent',simObj.Axes,'Scale',Scale,'LineWidth',LineWidth,...
         'Matrix',H_point2W_new,'AxisLabels',AxisLabels);
-    %X_new = simObj.ToolPose * points_T;
+    
+    printed_points_W = H_tool2W_desired * points_T(:,1:i); % printed points
+    plt_printed_points = plot3(simObj.Axes,...
+        printed_points_W(1,:), printed_points_W(2,:), printed_points_W(3,:),'.m');
     %plt_Waypoints = plot3(simObj.Axes,X_new(1,:),X_new(2,:),X_new(3,:),'.m');
     drawnow;
     pause(.15);
-    delete(point_csys);
+    if i ~= n
+        delete(point_csys);
+        delete(plt_printed_points);
+    end
 end
-
-%%
-    q_point2sphere = points_T(1:3,i)
-    q_nxtpoint2sphere = points_T(1:3,i+1)
-    H_sphere2W = simObj.ToolPose % invertible
-    
-    q_point2sphere = reshape(q_point2sphere,3,1);
-    q_nxtpoint2sphere = reshape(q_nxtpoint2sphere,3,1); 
-    
-    q_point2W = H_sphere2W * [q_point2sphere; 1]; 
-    q_nxtpoint2W = H_sphere2W * [q_nxtpoint2sphere;1]; 
-    
-    q_point2W = q_point2W(1:3);
-    q_nxtpoint2W = q_nxtpoint2W(1:3);
-    
-    z_unit = (q_point2W - H_sphere2W(1:3,4))/...
-        norm(q_point2W - H_sphere2W(1:3,4)); %z-axis unit normal radially outward from sphere center through point
-    
-    dist_v = q_nxtpoint2W - q_point2W; % vector from point to next point
-    proj_dist_v = dot(z_unit, dist_v); % length of projected vector onto unit norm
-    
-    projected_point2W = q_nxtpoint2W - proj_dist_v * z_unit; % projection of point onto the plane
-    
-    x_unit = (projected_point2W - q_point2W)/...
-        norm(projected_point2W - q_point2W); % x-axis unit normal
-    
-    y_unit = cross(z_unit, x_unit); 
-
-    H_point2W = [x_unit y_unit z_unit...
-        [q_point2W(1); q_point2W(2);...
-        q_point2W(3)]; [0 0 0 1]]; 
 

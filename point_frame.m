@@ -27,6 +27,9 @@ function H_point2W = point_frame(H_sphere2W, q_point2sphere, q_nxtpoint2sphere)
         norm(projected_point2W - q_point2W); % x-axis unit normal
     
     y_unit = cross(z_unit, x_unit); 
+    
+    x_unit = cross(y_unit,z_unit); % account for rounding issues
+    y_unit = cross(z_unit,x_unit); % account for rounding issues
 
     H_point2W = [x_unit y_unit z_unit...
         [q_point2W(1); q_point2W(2);...

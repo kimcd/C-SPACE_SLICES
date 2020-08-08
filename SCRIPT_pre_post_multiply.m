@@ -36,11 +36,11 @@ hFrame1 = triad(...
 
 %% Pre-Multiply Frame 0 
 % verbal description: 
-% 1) translate in global x-axis by 0.5 units
+% 1) start at frame 0, translate in global x-axis by 0.5 units
 % 2) translate in global y-axis by 0.5 units
 % 3) rotate about global x-axis by pi/2 radians
 % which is same as: 
-% 1) rotate about local x-axis by pi/2 radians
+% 1) start at frame 0, rotate about local x-axis by pi/2 radians
 % 2) translate in local y-axis by 0.5 units
 % 3) translate in local x-axis by 0.5 units
 Frame0 = Rx(pi/2)*Ty(.5)*Tx(.5);
